@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://treehub.dev/schemas/manifest-schema.json",
+  "title": "TreeHub Manifest",
+  "description": "Schema for TreeHub manifest.json files containing metadata and provenance.",
+  "type": "object",
+  "required": ["platform", "version", "files", "provenance", "stats", "schema_version"],
+  "properties": {
+    "platform": {
+      "type": "string",
+      "description": "Platform identifier.",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version string (semver or date-based)."
+    },
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date of the snapshot."
+    },
+    "files": {
+      "type": "object",
+      "required": ["tree"],
+      "properties": {
+        "tree": {
+          "type": "object",
+          "required": ["path", "hash", "size_bytes"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Relative path to the tree.json file."
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of the tree file."
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "File size in bytes."
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["indexed_by", "indexer_version"],
+      "properties": {
+        "indexed_by": {
+          "type": "string",
+          "description": "Who or what performed the indexing."
+        },
+        "indexer_version": {
+          "type": "string",
+          "description": "Version of the indexer used."
+        },
+        "llms_txt_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the source llms.txt."
+        },
+        "build_log_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "URL to the CI build log."
+        },
+        "git_commit": {
+          "type": ["string", "null"],
+          "description": "Git commit SHA at time of indexing."
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["pages_count", "max_depth"],
+      "properties": {
+        "pages_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total pages indexed."
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum depth of the tree."
+        },
+        "tokens_indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total tokens processed."
+        },
+        "indexing_duration_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Time taken to index in seconds."
+        }
+      }
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Version of the manifest schema.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    }
+  }
+}

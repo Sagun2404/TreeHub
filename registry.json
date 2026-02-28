@@ -1,0 +1,32 @@
+{
+  "supabase": {
+    "source_url": "https://supabase.com/llms.txt",
+    "versioning": "semver",
+    "schedule": "weekly",
+    "description": "Open source Firebase alternative with Postgres"
+  },
+  "stripe": {
+    "source_url": "https://docs.stripe.com/llms.txt",
+    "versioning": "date",
+    "schedule": "weekly",
+    "description": "Payment processing platform"
+  },
+  "vercel": {
+    "source_url": "https://vercel.com/docs/llms.txt",
+    "versioning": "date",
+    "schedule": "weekly",
+    "description": "Frontend cloud platform"
+  },
+  "huggingface": {
+    "source_url": "https://huggingface.co/docs/llms.txt",
+    "versioning": "date",
+    "schedule": "weekly",
+    "description": "ML model hub and inference platform"
+  },
+  "openai": {
+    "source_url": "https://platform.openai.com/llms.txt",
+    "versioning": "date",
+    "schedule": "weekly",
+    "description": "AI API platform (GPT, DALL·E, Whisper)"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "platform": "example-platform",
+  "version": "1.0.0",
+  "snapshot_date": "2025-02-28",
+  "files": {
+    "tree": {
+      "path": "v1.0.0-tree.json",
+      "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 2048
+    }
+  },
+  "provenance": {
+    "indexed_by": "manual",
+    "indexer_version": "1.0.0",
+    "llms_txt_hash": "sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+    "build_log_url": null,
+    "git_commit": null
+  },
+  "stats": {
+    "pages_count": 42,
+    "max_depth": 3,
+    "tokens_indexed": 8500,
+    "indexing_duration_seconds": 45
+  },
+  "schema_version": "1.0.0"
+}

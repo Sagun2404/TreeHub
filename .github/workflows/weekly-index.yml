@@ -1,0 +1,149 @@
+name: Weekly Index Update
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Specific platform to re-index (leave blank for all)"
+        required: false
+        type: string
+      force:
+        description: "Force re-index even if unchanged"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  index:
+    name: Re-index Platforms
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Platforms to index — add new platforms here
+        platform:
+          - supabase
+          - stripe
+          - vercel
+          - huggingface
+          - openai
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install httpx jsonschema openai
+
+      - name: Skip if platform not targeted
+        if: >
+          github.event.inputs.platform != '' &&
+          github.event.inputs.platform != matrix.platform
+        run: echo "Skipping ${{ matrix.platform }}" && exit 0
+
+      - name: Load platform config
+        id: config
+        run: |
+          PLATFORM="${{ matrix.platform }}"
+          URL=$(python -c "
+          import json
+          registry = json.load(open('registry.json'))
+          print(registry.get('$PLATFORM', {}).get('source_url', ''))
+          ")
+          echo "source_url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Crawl llms.txt
+        run: |
+          python scripts/crawler.py \
+            --platform ${{ matrix.platform }} \
+            --url "${{ steps.config.outputs.source_url }}" \
+            ${{ github.event.inputs.force == 'true' && '--force' || '' }}
+
+      - name: Detect changes
+        id: detect
+        run: |
+          PLATFORM="${{ matrix.platform }}"
+          LATEST=$(ls indices/$PLATFORM/*-tree.json 2>/dev/null | sort | tail -1 || echo "")
+
+          if [ -z "$LATEST" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "No existing index found, will create first index."
+          else
+            CURRENT_HASH=$(python -c "
+          import hashlib
+          content = open('indices/$PLATFORM/llms.txt').read()
+          print(f'sha256:{hashlib.sha256(content.encode()).hexdigest()}')
+          ")
+            PREV_HASH=$(python -c "
+          import json
+          data = json.load(open('$LATEST'))
+          print(data.get('meta', {}).get('llms_txt_hash', ''))
+          ")
+
+            if [ "$CURRENT_HASH" != "$PREV_HASH" ] || [ "${{ github.event.inputs.force }}" == "true" ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "No changes detected for $PLATFORM."
+            fi
+          fi
+
+      - name: Build PageIndex tree
+        if: steps.detect.outputs.changed == 'true'
+        run: |
+          VERSION="v$(date +%Y.%m.%d)"
+          python scripts/indexer.py \
+            --platform ${{ matrix.platform }} \
+            --version "$VERSION"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Validate index
+        if: steps.detect.outputs.changed == 'true'
+        run: |
+          VERSION="v$(date +%Y.%m.%d)"
+          python scripts/validator.py \
+            "indices/${{ matrix.platform }}/${VERSION}-tree.json" \
+            --manifest "indices/${{ matrix.platform }}/${VERSION}-manifest.json"
+
+      - name: Update latest symlink
+        if: steps.detect.outputs.changed == 'true'
+        run: |
+          VERSION="v$(date +%Y.%m.%d)"
+          PLATFORM="${{ matrix.platform }}"
+          cd indices/$PLATFORM
+          ln -sf "${VERSION}-tree.json" latest.json
+
+      - name: Create Pull Request
+        if: steps.detect.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: update ${{ matrix.platform }} index ($(date +%Y-%m-%d))"
+          title: "🔄 Update ${{ matrix.platform }} index — $(date +%Y-%m-%d)"
+          body: |
+            Automated weekly re-index for **${{ matrix.platform }}**.
+
+            - Triggered by: ${{ github.event_name }}
+            - Platform: ${{ matrix.platform }}
+            - Date: $(date +%Y-%m-%d)
+
+            Please review the changes and merge if the index looks correct.
+          branch: "auto-index/${{ matrix.platform }}"
+          labels: "automation,indexing"
