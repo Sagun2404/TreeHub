@@ -6,6 +6,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Server](https://img.shields.io/badge/MCP-Server-blue)](https://modelcontextprotocol.io/)
 [![Index Count](https://img.shields.io/badge/Platforms-5-green)]()
+[![CI](https://github.com/treehub/indices/actions/workflows/ci.yml/badge.svg)](https://github.com/treehub/indices/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/treehub/indices/graph/badge.svg?token=YOUR_TOKEN)](https://codecov.io/gh/treehub/indices)
+[![PyPI version](https://badge.fury.io/py/treehub.svg)](https://badge.fury.io/py/treehub)
+
+<!-- DEMO GIF -->
+<!-- Replace this placeholder with a high-quality GIF or terminal recording of: 1) pulling an index 2) querying it instantly -->
+<p align="center">
+  <img src="https://via.placeholder.com/800x400.png?text=TreeHub+Demo+Recording+-+Coming+Soon!" alt="TreeHub Demo Video" />
+</p>
 
 Eliminate indexing overhead. Stop rebuilding the same PageIndex trees. Focus on building, not crawling.
 
@@ -44,7 +53,7 @@ treehub pull supabase@latest
 
 ```bash
 # Install
-pip install treehub-cli
+pip install treehub
 
 # List available platforms
 treehub list
@@ -83,6 +92,53 @@ Add to your Claude Desktop / Cursor config:
 | `fetch_tree(platform, version)` | Full PageIndex tree |
 | `query_tree(platform, version, path)` | Subtree at specific path |
 | `search_tree(platform, version, query)` | Fuzzy search nodes |
+
+---
+
+## Usage with RAG / Integrations
+
+TreeHub indices are designed to be instantly loaded into modern AI frameworks.
+
+### LangChain
+```python
+import json
+from langchain_core.documents import Document
+
+with open("indices/supabase/v2.1.0-tree.json") as f:
+    tree_data = json.load(f)["tree"]
+
+# Load into LangChain Documents
+docs = [Document(page_content=node["summary"], metadata={"title": node["title"]}) 
+        for node in tree_data["root"]["children"]]
+```
+
+### LlamaIndex
+```python
+import json
+from llama_index.core.schema import TextNode
+
+with open("indices/supabase/v2.1.0-tree.json") as f:
+    tree_data = json.load(f)["tree"]
+
+# Load into LlamaIndex Nodes
+nodes = [TextNode(text=node["summary"], metadata={"title": node["title"]}) 
+         for node in tree_data["root"]["children"]]
+```
+
+### Vercel AI SDK
+```typescript
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
+// Fetch the index directly from TreeHub
+const supabaseTree = await fetch('https://raw.githubusercontent.com/treehub/indices/main/indices/supabase/latest.json').then(res => res.json());
+
+const { text } = await generateText({
+  model: openai('gpt-4o'),
+  system: `You are an expert on Supabase. Use this context: ${JSON.stringify(supabaseTree.tree.root.summary)}`,
+  prompt: 'How do I query a database in Supabase?',
+});
+```
 
 ---
 
@@ -241,6 +297,19 @@ PageIndex trees are **hierarchical semantic indices**—structured maps of docum
 - Page relationships
 
 Unlike flat embeddings, trees preserve structure that reasoning models (Claude, o3, etc.) can navigate efficiently. TreeHub makes this pattern **zero-cost** to adopt.
+
+---
+
+## Powered By TreeHub
+
+Are you building an AI agent, RAG app, or documentation tool using our indices? Show your support and help form a viral loop by putting this badge in your repository's `README.md`:
+
+[![Indexed by TreeHub](https://img.shields.io/badge/Indexed_by-TreeHub-10b981?style=for-the-badge&logo=treehouse&logoColor=white)](https://github.com/treehub/indices)
+
+Add this snippet to your markdown:
+```markdown
+[![Indexed by TreeHub](https://img.shields.io/badge/Indexed_by-TreeHub-10b981?style=for-the-badge&logo=treehouse&logoColor=white)](https://github.com/treehub/indices)
+```
 
 ---
 

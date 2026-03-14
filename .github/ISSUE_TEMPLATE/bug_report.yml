@@ -1,0 +1,69 @@
+name: Bug Report
+description: Create a report to help us improve 🌳 TreeHub
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! Please provide as much detail as possible.
+
+  - type: input
+    id: version
+    attributes:
+      label: TreeHub Version
+      description: What version of TreeHub/treehub-cli are you using? (Run `treehub --version`)
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of TreeHub does this bug concern?
+      options:
+        - CLI (`treehub-cli`)
+        - MCP Server
+        - Index Data (e.g., malformed JSON tree)
+        - Documentation / Readme
+        - Scripts (Crawler/Indexer/Validator)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: When I run `treehub pull supabase@latest`, I get a JSONDecodeError...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run command '...'
+        2. See error '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS, Python Version, IDE/Agent (if related to MCP server), etc.
+      placeholder: "OS: macOS 14.5, Python 3.12, Cursor IDE"
+    validations:
+      required: false

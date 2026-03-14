@@ -1,0 +1,61 @@
+name: Platform Index Request
+description: Request a new platform documentation tree to be indexed
+title: "[Platform Request]: <Platform Name>"
+labels: ["platform-request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Is a popular developer platform missing from our registry? Let us know so we can add it to the weekly indexing pipeline.
+
+  - type: input
+    id: name
+    attributes:
+      label: Platform Name
+      description: The human-readable name of the platform (e.g., "Tailwind CSS").
+      placeholder: "Tailwind CSS"
+    validations:
+      required: true
+
+  - type: input
+    id: key
+    attributes:
+      label: Registry Key
+      description: The proposed short key for `registry.json` and registry commands (e.g., "tailwindcss").
+      placeholder: "tailwindcss"
+    validations:
+      required: true
+
+  - type: input
+    id: docs_url
+    attributes:
+      label: Documentation URL
+      description: Link to the platform's official documentation homepage.
+      placeholder: "https://tailwindcss.com/docs"
+    validations:
+      required: true
+
+  - type: input
+    id: llms_txt
+    attributes:
+      label: llms.txt URL
+      description: Link to the platform's full LLM context file (mandatory for indexing).
+      placeholder: "https://tailwindcss.com/llms.txt"
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Why prioritize this platform?
+      description: Briefly explain why this index would be highly valuable for the community. Are many AI agents requesting it?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: willing_to_contribute
+    attributes:
+      label: Contribution
+      description: The fastest way to get a platform added is to submit a PR! Are you willing to add it yourself following the template?
+      options:
+        - label: Yes, I am willing to submit a PR with the initial index
